@@ -1,15 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace VendorTrack.Models.DTOs
+﻿namespace VendorTrack.Models.DTOs
 {
-    public class VendorNcrDTO
+    public class UpdateVendorNcrDTO
     {
         public int VendorNcrId { get; set; }
         public required string NcrNumber { get; set; }
         public required string PartNumber { get; set; }
         public int Fault { get; set; }
-        public string? FaultDescription { get; set; }
         public DateOnly ReceivedDate { get; set; }
         public int ReceivedQuantity { get; set; }
         public int NonConformingQuantity { get; set; }

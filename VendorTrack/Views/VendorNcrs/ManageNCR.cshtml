@@ -1,146 +1,139 @@
 ﻿@using VendorTrack.Models.DTOs
-@model IEnumerable<VendorNcrDTO>
-<div>
-	<div class="row mb-1">
-		<div class="col-2">
-			<span>Part Number</span>
-		</div>
-		<div class="col-1">
-			<span>:</span>
-		</div>
-		<div class="col-9">
-			<input type="text" id="txt_partnumber" placeholder="Enter" />
-		</div>
+@model IEnumerable<NcrFaultDTO>
+
+<div class="card shadow-sm">
+	<div class="card-header bg-secondary text-white">
+		<h6 class="mb-0">
+			<i class="bi bi-file-earmark-text me-2"></i> Vendor NCR Entry
+		</h6>
 	</div>
-	<div class="row mb-1">
-		<div class="col-2">
-			<span>Fault</span>
+
+	<div class="card-body bg-light">
+		<div class="row mb-1">
+			<div class="col-2">
+				<span>NCR Number</span>
+			</div>
+			<div class="col-1">
+				<span>:</span>
+			</div>
+			<div class="col-9">
+				<label class="form-control-plaintext fw-semibold" id="lbl_ncrnumber">Auto Gen</label>
+			</div>
 		</div>
-		<div class="col-1">
-			<span>:</span>
+		<div class="row mb-1">
+			<div class="col-2">
+				<span>Part Number</span>
+			</div>
+			<div class="col-1">
+				<span>:</span>
+			</div>
+			<div class="col-9">
+				<input type="text" id="txt_partnumber" placeholder="Enter" class="form-control" autocomplete="off" />
+			</div>
 		</div>
-		<div class="col-9">
-			<select id="drp_fault">
-				<option>--Select--</option>
-				<option>Damage</option>
-				<option>Dimension</option>
-			</select>
+		<div class="row mb-1">
+			<div class="col-2">
+				<span>Fault</span>
+			</div>
+			<div class="col-1">
+				<span>:</span>
+			</div>
+			<div class="col-9">
+				<select id="drp_fault" class="form-select">
+					<option value="0">--Select--</option>
+					@foreach (var fault in Model)
+					{
+						<option value="@fault.FaultId">@fault.FaultDescription</option>
+					}
+				</select>
+			</div>
 		</div>
-	</div>
-	<div class="row mb-1">
-		<div class="col-2">
-			<span>Received Date</span>
+		<div class="row mb-1">
+			<div class="col-2">
+				<span>Received Date</span>
+			</div>
+			<div class="col-1">
+				<span>:</span>
+			</div>
+			<div class="col-9">
+				<input type="text" id="txt_recdate" placeholder="Date picker" class="form-control" autocomplete="off" />
+			</div>
 		</div>
-		<div class="col-1">
-			<span>:</span>
+		<div class="row mb-1">
+			<div class="col-2">
+				<span>Received Quantity</span>
+			</div>
+			<div class="col-1">
+				<span>:</span>
+			</div>
+			<div class="col-9">
+				<input type="text" id="txt_recqty" placeholder="Enter" class="form-control" autocomplete="off" />
+			</div>
 		</div>
-		<div class="col-9">
-			<input type="text" id="txt_recdate" placeholder="Date picker" />
+		<div class="row mb-1">
+			<div class="col-2">
+				<span>Non-Conforming Qty</span>
+			</div>
+			<div class="col-1">
+				<span>:</span>
+			</div>
+			<div class="col-9">
+				<input type="text" id="txt_ncqty" placeholder="Enter" class="form-control" autocomplete="off" />
+			</div>
 		</div>
-	</div>
-	<div class="row mb-1">
-		<div class="col-2">
-			<span>Received Quantity</span>
+		<div class="row mb-1">
+			<div class="col-2">
+				<span>Vendor Name</span>
+			</div>
+			<div class="col-1">
+				<span>:</span>
+			</div>
+			<div class="col-9">
+				<input type="text" id="txt_vendor" placeholder="Enter" class="form-control" autocomplete="off" />
+			</div>
 		</div>
-		<div class="col-1">
-			<span>:</span>
+		<div class="row mb-1">
+			<div class="col-2">
+				<span>Contact Name</span>
+			</div>
+			<div class="col-1">
+				<span>:</span>
+			</div>
+			<div class="col-9">
+				<input type="text" id="txt_contactname" placeholder="Enter" class="form-control" autocomplete="off" />
+			</div>
 		</div>
-		<div class="col-9">
-			<input type="text" id="txt_recqty" placeholder="Enter" />
+		<div class="row mb-1">
+			<div class="col-2">
+				<span>Contact Email</span>
+			</div>
+			<div class="col-1">
+				<span>:</span>
+			</div>
+			<div class="col-9">
+				<input type="text" id="txt_contactemail" placeholder="Enter" class="form-control" autocomplete="off" />
+			</div>
 		</div>
-	</div>
-	<div class="row mb-1">
-		<div class="col-2">
-			<span>Non-Conforming Quantity</span>
+		<div class="row mt-4">
+			<div class="col-12 d-flex justify-content-end gap-2">
+				<input id="hid_NcrId_1" type="hidden" />
+				<button class="btn btn-success" id="btn_save" type="button">
+					<i class="bi bi-check-circle"></i> Submit
+				</button>
+				<button class="btn btn-warning" id="btn_update" type="button" style="display:none">
+					<i class="bi bi-pencil"></i> Update
+				</button>
+				<button class="btn btn-outline-danger" id="btn_clear" type="button" onclick="location.reload()">
+					<i class="bi bi-x-circle"></i> Clear
+				</button>
+			</div>
 		</div>
-		<div class="col-1">
-			<span>:</span>
-		</div>
-		<div class="col-9">
-			<input type="text" id="txt_ncqty" placeholder="Enter" />
-		</div>
-	</div>
-	<div class="row mb-1">
-		<div class="col-2">
-			<span>Vendor Name</span>
-		</div>
-		<div class="col-1">
-			<span>:</span>
-		</div>
-		<div class="col-9">
-			<input type="text" id="txt_vendor" placeholder="Enter" />
-		</div>
-	</div>
-	<div class="row mb-1">
-		<div class="col-2">
-			<span>Contact Name</span>
-		</div>
-		<div class="col-1">
-			<span>:</span>
-		</div>
-		<div class="col-9">
-			<input type="text" id="txt_contactname" placeholder="Enter" />
-		</div>
-	</div>
-	<div class="row mb-1">
-		<div class="col-2">
-			<span>Contact Email</span>
-		</div>
-		<div class="col-1">
-			<span>:</span>
-		</div>
-		<div class="col-9">
-			<input type="text" id="txt_contactemail" placeholder="Enter" />
-		</div>
-	</div>
-	<div class="row mb-5">
-		<div class="col-4 d-flex justify-content-evenly">
-			<input id="hid_NcrId_1" type="hidden" />
-			<button class="btn btn-success" id="btn_save" type="button">Submit</button>
-			<button class="btn btn-success" id="btn_update" type="button" style="display:none">Update</button>
-			<button class="btn btn-danger" id="btn_clear" type="button" onclick="location.reload()">Clear</button>
-		</div>
+
 	</div>
 </div>
+@section Scripts {
+	<script src="~/js/NCR-Manager.js"></script>
 
-<div>
-	<table class="table table-bordered">
-		<thead>
-			<tr>
-				<th>NCR Number</th>
-				<th>Part Number</th>
-				<th>Fault</th>
-				<th>Received Date</th>
-				<th>Received Quantity</th>
-				<th>Non-Conforming Quantity</th>
-				<th>Vendor Name</th>
-				<th>Contact Name</th>
-				<th>Contact Email</th>
-			</tr>
-		</thead>
-		<tbody>
-			@foreach (var ncr in Model)
-			{
-				<tr>
-					<td>@ncr.NcrNumber</td>
-					<td>@ncr.PartNumber</td>
-					<td>@ncr.Fault</td>
-					<td>@ncr.ReceivedDate</td>
-					<td>@ncr.ReceivedQuantity</td>
-					<td>@ncr.NonConformingQuantity</td>
-					<td>@ncr.VendorName</td>
-					<td>@ncr.ContactName</td>
-					<td>@ncr.ContactEmail</td>
-					<td>
-						<button type="button" class="btn btn-primary update">Update</button>
-						<button type="button" class="btn btn-danger delete">Delete</button>
-						<input id="hid_NcrId" type="hidden" value="@ncr.VendorNcrId" />
-					</td>
-				</tr>
-			}
-		</tbody>
-	</table>
-</div>
+}
 
-<script src="~/lib/jquery/dist/jquery.js"></script>
-<script src="~/js/NCR-Manager.js"></script>
+

@@ -10,7 +10,8 @@ namespace VendorTrack.Data
         {
             
         }
-        public DbSet<VendorNcr> VendorNcr { get; set; }
-        public DbSet<VendorTrack.Models.DTOs.VendorNcrDTO> VendorNcrDTO { get; set; } = default!;
+        public DbSet<VendorNcr> VendorNcrs { get; set; }
+        public DbSet<NcrFault> NcrFaults { get; set; }
+        public DbSet<Counters> Counters { get; set; }
     }
 }

@@ -1,10 +1,12 @@
 using Microsoft.EntityFrameworkCore;
 using VendorTrack.Data;
+using VendorTrack.Helper;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<INcrNumberGenerator, NcrNumberGenerator>();
 
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));

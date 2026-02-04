@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VendorTrack.Data;
 
@@ -11,9 +12,11 @@ using VendorTrack.Data;
 namespace VendorTrack.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20260204114641_Fault Entity")]
+    partial class FaultEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,46 +25,56 @@ namespace VendorTrack.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("VendorTrack.Models.Entities.Counters", b =>
+            modelBuilder.Entity("VendorTrack.Models.DTOs.VendorNcrDTO", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("VendorNcrId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("VendorNcrId"));
 
-                    b.Property<int>("LastGeneratedNumber")
-                        .HasColumnType("int");
+                    b.Property<string>("ContactEmail")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("Reference")
+                    b.Property<string>("ContactName")
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.HasKey("Id");
+                    b.Property<string>("Fault")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
-                    b.ToTable("Counters");
-                });
+                    b.Property<string>("NcrNumber")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
-            modelBuilder.Entity("VendorTrack.Models.Entities.NcrFault", b =>
-                {
-                    b.Property<int>("FaultId")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("NonConformingQuantity")
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FaultId"));
-
-                    b.Property<bool>("ActiveStatus")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("FaultDescription")
+                    b.Property<string>("PartNumber")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.HasKey("FaultId");
+                    b.Property<DateTime>("ReceivedDate")
+                        .HasColumnType("smalldatetime");
 
-                    b.ToTable("NcrFaults");
+                    b.Property<int>("ReceivedQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<string>("VendorName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("VendorNcrId");
+
+                    b.ToTable("VendorNcrDTO");
                 });
 
             modelBuilder.Entity("VendorTrack.Models.Entities.VendorNcr", b =>
@@ -82,9 +95,10 @@ namespace VendorTrack.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.Property<int>("Fault")
+                    b.Property<string>("Fault")
+                        .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("int");
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("NcrNumber")
                         .IsRequired()
@@ -99,8 +113,8 @@ namespace VendorTrack.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<DateOnly>("ReceivedDate")
-                        .HasColumnType("date");
+                    b.Property<DateTime>("ReceivedDate")
+                        .HasColumnType("smalldatetime");
 
                     b.Property<int>("ReceivedQuantity")
                         .HasColumnType("int");
@@ -112,7 +126,7 @@ namespace VendorTrack.Migrations
 
                     b.HasKey("VendorNcrId");
 
-                    b.ToTable("VendorNcrs");
+                    b.ToTable("VendorNcr");
                 });
 #pragma warning restore 612, 618
         }

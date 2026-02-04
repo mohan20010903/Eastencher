@@ -1,0 +1,59 @@
+﻿.card {
+    border-radius: 0.75rem;
+}
+
+.card-header {
+    font-weight: 600;
+}
+
+.table thead th {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.table td, .table th {
+    padding: 0.6rem 0.75rem;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-danger:hover {
+    color: #fff;
+}
+
+.card {
+    border-radius: 0.75rem;
+}
+
+.card-header {
+    font-weight: 600;
+}
+
+.card-body {
+    padding: 1.25rem;
+}
+
+.row > div:first-child span {
+    font-weight: 600;
+    color: #495057;
+}
+
+.row {
+    align-items: center;
+}
+
+.form-control,
+.form-select {
+    height: 38px;
+}
+
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.15rem rgba(13,110,253,.25);
+    }

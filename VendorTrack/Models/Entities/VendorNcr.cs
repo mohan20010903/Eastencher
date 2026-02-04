@@ -15,10 +15,10 @@ namespace VendorTrack.Models.Entities
         public required string PartNumber { get; set; }
 
         [MaxLength(100)]
-        public required string Fault { get; set; }
+        public required int Fault { get; set; }
 
-        [Column(TypeName = "smalldatetime")]
-        public DateTime ReceivedDate { get; set; }
+        [Column(TypeName = "date")]
+        public DateOnly ReceivedDate { get; set; }
         public int ReceivedQuantity { get; set; }
         public int NonConformingQuantity { get; set; }
 

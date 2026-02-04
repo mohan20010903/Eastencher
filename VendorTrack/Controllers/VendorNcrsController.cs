@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using VendorTrack.Data;
+using VendorTrack.Helper;
 using VendorTrack.Models.DTOs;
 using VendorTrack.Models.Entities;
 
@@ -9,160 +10,133 @@ namespace VendorTrack.Controllers
     public class VendorNcrsController : Controller
     {
         private readonly ApplicationDBContext _context;
+        private readonly INcrNumberGenerator _ncrNumberGenerator;
 
-        public VendorNcrsController(ApplicationDBContext context)
+        public VendorNcrsController(ApplicationDBContext context, INcrNumberGenerator ncrNumberGenerator)
         {
             _context = context;
+            _ncrNumberGenerator = ncrNumberGenerator;
         }
 
-        // GET: VendorNcrs
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            var VendorNcrDTOlist = await _context.VendorNcr
-                .Select(x => new VendorNcrDTO
+            var VendorFaultDTOlist = _context.NcrFaults
+                .Select(x => new NcrFaultDTO
                 {
-                    VendorNcrId = x.VendorNcrId,
-                    NcrNumber = x.NcrNumber,
-                    PartNumber = x.PartNumber,
-                    Fault = x.Fault,
-                    ReceivedDate = x.ReceivedDate,
-                    ReceivedQuantity = x.ReceivedQuantity,
-                    NonConformingQuantity = x.NonConformingQuantity,
-                    VendorName = x.VendorName,
-                    ContactName = x.ContactName,
-                    ContactEmail = x.ContactEmail,
-                })
-                .ToListAsync();
-            return View("ManageNCR", VendorNcrDTOlist);
+                    FaultId = x.FaultId,
+                    FaultDescription = x.FaultDescription
+                }).ToList();
+            return View("ManageNCR", VendorFaultDTOlist);
         }
-
-        // GET: VendorNcrs/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public IActionResult ViewVendorNCRs()
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            var VendorNcrDTOlist = _context.VendorNcrs
+                .GroupJoin(
+                _context.NcrFaults,
+                a => a.Fault,
+                b => b.FaultId,
+                (a, b) => new { a, b }
+                )
+                .SelectMany(
+                    x => x.b.DefaultIfEmpty(),
+                    (x, b) => new VendorNcrDTO
+                    {
+                        VendorNcrId = x.a.VendorNcrId,
+                        NcrNumber = x.a.NcrNumber,
+                        PartNumber = x.a.PartNumber,
+                        FaultDescription = b != null ? b.FaultDescription : "N/A",
+                        ReceivedDate = x.a.ReceivedDate,
+                        ReceivedQuantity = x.a.ReceivedQuantity,
+                        NonConformingQuantity = x.a.NonConformingQuantity,
+                        VendorName = x.a.VendorName,
+                        ContactName = x.a.ContactName,
+                        ContactEmail = x.a.ContactEmail
+                    }
+                ).ToList();
 
-            var vendorNcr = await _context.VendorNcr
-                .FirstOrDefaultAsync(m => m.VendorNcrId == id);
-            if (vendorNcr == null)
-            {
-                return NotFound();
-            }
-
-            return View(vendorNcr);
+            return View(VendorNcrDTOlist);
         }
 
-        // GET: VendorNcrs/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: VendorNcrs/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("VendorNcrId,NcrNumber,PartNumber,Fault,ReceivedDate,ReceivedQuantity,NonConformingQuantity,VendorName,ContactName,ContactEmail")] VendorNcr vendorNcr)
+        public IActionResult GetVendorNcrById([FromBody] int ncrId)
+        {
+            var VendorNcrDTOlist = _context.VendorNcrs
+                .Where(o => o.VendorNcrId == ncrId)
+                .Select(s => new VendorNcrDTO {
+                    VendorNcrId = s.VendorNcrId,
+                    NcrNumber = s.NcrNumber,
+                    PartNumber = s.PartNumber,
+                    Fault = s.Fault,
+                    ReceivedDate = s.ReceivedDate,
+                    ReceivedQuantity = s.ReceivedQuantity,
+                    NonConformingQuantity = s.NonConformingQuantity,
+                    VendorName = s.VendorName,
+                    ContactName = s.ContactName,
+                    ContactEmail = s.ContactEmail
+                });
+
+            if (VendorNcrDTOlist == null) return BadRequest(new { message = "NCR not found" });
+
+            return Ok(VendorNcrDTOlist);
+        }
+
+        [HttpPost]
+        public IActionResult SaveNewVendorNCR([FromBody] AddNewVendorNcrDTO addNewVendorNcrDTO)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(vendorNcr);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                var VendorNcrEntity = new VendorNcr()
+                {
+                    NcrNumber = _ncrNumberGenerator.GenerateNcrNumber(),
+                    PartNumber = addNewVendorNcrDTO.PartNumber,
+                    Fault = addNewVendorNcrDTO.Fault,
+                    ReceivedDate = addNewVendorNcrDTO.ReceivedDate,
+                    ReceivedQuantity = addNewVendorNcrDTO.ReceivedQuantity,
+                    NonConformingQuantity = addNewVendorNcrDTO.NonConformingQuantity,
+                    VendorName = addNewVendorNcrDTO.VendorName,
+                    ContactName = addNewVendorNcrDTO.ContactName,
+                    ContactEmail = addNewVendorNcrDTO.ContactEmail,
+                };
+                _context.Add(VendorNcrEntity);
+                _context.SaveChanges();
+                return Ok(new { message = "NCR created successfully" });
             }
-            return View(vendorNcr);
+            return BadRequest(new { message = "Something went wrong" });
         }
 
-        // GET: VendorNcrs/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        [HttpPut]
+        public IActionResult UpdateVendorNCR([FromBody] UpdateVendorNcrDTO updateVendorNcrDTO)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var vendorNcr = await _context.VendorNcr.FindAsync(id);
-            if (vendorNcr == null)
-            {
-                return NotFound();
-            }
-            return View(vendorNcr);
-        }
-
-        // POST: VendorNcrs/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("VendorNcrId,NcrNumber,PartNumber,Fault,ReceivedDate,ReceivedQuantity,NonConformingQuantity,VendorName,ContactName,ContactEmail")] VendorNcr vendorNcr)
-        {
-            if (id != vendorNcr.VendorNcrId)
-            {
-                return NotFound();
-            }
-
             if (ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(vendorNcr);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!VendorNcrExists(vendorNcr.VendorNcrId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                var VendorNcrEntity = _context.VendorNcrs.Find(updateVendorNcrDTO.VendorNcrId);
+
+                if(VendorNcrEntity == null) return BadRequest(new { message = "NCR not found" });
+
+                VendorNcrEntity.NcrNumber = updateVendorNcrDTO.NcrNumber;
+                VendorNcrEntity.PartNumber = updateVendorNcrDTO.PartNumber;
+                VendorNcrEntity.Fault = updateVendorNcrDTO.Fault;
+                VendorNcrEntity.ReceivedDate = updateVendorNcrDTO.ReceivedDate;
+                VendorNcrEntity.ReceivedQuantity = updateVendorNcrDTO.ReceivedQuantity;
+                VendorNcrEntity.NonConformingQuantity = updateVendorNcrDTO.NonConformingQuantity;
+                VendorNcrEntity.VendorName = updateVendorNcrDTO.VendorName;
+                VendorNcrEntity.ContactName = updateVendorNcrDTO.ContactName;
+                VendorNcrEntity.ContactEmail = updateVendorNcrDTO.ContactEmail;
+
+                _context.SaveChanges();
+                return Ok(new { message = "NCR updated successfully" });
             }
-            return View(vendorNcr);
+            return BadRequest(new { message = "Something went wrong" });
         }
 
-        // GET: VendorNcrs/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        [HttpDelete]
+        public IActionResult DeleteNcr([FromBody] int ncrId)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var vendorNcr = await _context.VendorNcr
-                .FirstOrDefaultAsync(m => m.VendorNcrId == id);
-            if (vendorNcr == null)
-            {
-                return NotFound();
-            }
-
-            return View(vendorNcr);
-        }
-
-        // POST: VendorNcrs/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var vendorNcr = await _context.VendorNcr.FindAsync(id);
-            if (vendorNcr != null)
-            {
-                _context.VendorNcr.Remove(vendorNcr);
-            }
-
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
-        private bool VendorNcrExists(int id)
-        {
-            return _context.VendorNcr.Any(e => e.VendorNcrId == id);
+            var VendorNcr = _context.VendorNcrs.Find(ncrId);
+            if (VendorNcr == null) return BadRequest(new { message = "NCR not found" });
+            _context.VendorNcrs.Remove(VendorNcr);
+            _context.SaveChanges();
+            return Ok(new { message = "NCR deleted successfully" });
         }
     }
 }
