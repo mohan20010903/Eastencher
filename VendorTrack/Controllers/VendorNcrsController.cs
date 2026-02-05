@@ -1,83 +1,37 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using VendorTrack.Data;
-using VendorTrack.Helper;
 using VendorTrack.Models.DTOs;
-using VendorTrack.Models.Entities;
+using VendorTrack.Repositories;
 
 namespace VendorTrack.Controllers
 {
     public class VendorNcrsController : Controller
     {
-        private readonly ApplicationDBContext _context;
-        private readonly INcrNumberGenerator _ncrNumberGenerator;
+        private readonly IVendorNcrRepository _vendorNcrRepository;
 
-        public VendorNcrsController(ApplicationDBContext context, INcrNumberGenerator ncrNumberGenerator)
+        public VendorNcrsController(IVendorNcrRepository vendorNcrRepository)
         {
-            _context = context;
-            _ncrNumberGenerator = ncrNumberGenerator;
+            _vendorNcrRepository = vendorNcrRepository;
         }
 
         public IActionResult Index()
         {
-            var VendorFaultDTOlist = _context.NcrFaults
-                .Select(x => new NcrFaultDTO
-                {
-                    FaultId = x.FaultId,
-                    FaultDescription = x.FaultDescription
-                }).ToList();
-            return View("ManageNCR", VendorFaultDTOlist);
+            var NcrFaultDTOlist = _vendorNcrRepository.GetNcrFaults();
+            return View("ManageNCR", NcrFaultDTOlist);
         }
         public IActionResult ViewVendorNCRs()
         {
-            var VendorNcrDTOlist = _context.VendorNcrs
-                .GroupJoin(
-                _context.NcrFaults,
-                a => a.Fault,
-                b => b.FaultId,
-                (a, b) => new { a, b }
-                )
-                .SelectMany(
-                    x => x.b.DefaultIfEmpty(),
-                    (x, b) => new VendorNcrDTO
-                    {
-                        VendorNcrId = x.a.VendorNcrId,
-                        NcrNumber = x.a.NcrNumber,
-                        PartNumber = x.a.PartNumber,
-                        FaultDescription = b != null ? b.FaultDescription : "N/A",
-                        ReceivedDate = x.a.ReceivedDate,
-                        ReceivedQuantity = x.a.ReceivedQuantity,
-                        NonConformingQuantity = x.a.NonConformingQuantity,
-                        VendorName = x.a.VendorName,
-                        ContactName = x.a.ContactName,
-                        ContactEmail = x.a.ContactEmail
-                    }
-                ).ToList();
-
+            var VendorNcrDTOlist = _vendorNcrRepository.GetVendorNcrs();
             return View(VendorNcrDTOlist);
         }
 
         [HttpPost]
         public IActionResult GetVendorNcrById([FromBody] int ncrId)
         {
-            var VendorNcrDTOlist = _context.VendorNcrs
-                .Where(o => o.VendorNcrId == ncrId)
-                .Select(s => new VendorNcrDTO {
-                    VendorNcrId = s.VendorNcrId,
-                    NcrNumber = s.NcrNumber,
-                    PartNumber = s.PartNumber,
-                    Fault = s.Fault,
-                    ReceivedDate = s.ReceivedDate,
-                    ReceivedQuantity = s.ReceivedQuantity,
-                    NonConformingQuantity = s.NonConformingQuantity,
-                    VendorName = s.VendorName,
-                    ContactName = s.ContactName,
-                    ContactEmail = s.ContactEmail
-                });
+            var VendorNcrDTO = _vendorNcrRepository.GetVendorNcrById(ncrId);
 
-            if (VendorNcrDTOlist == null) return BadRequest(new { message = "NCR not found" });
+            if (VendorNcrDTO == null) return BadRequest(new { message = "NCR not found" });
 
-            return Ok(VendorNcrDTOlist);
+            return Ok(VendorNcrDTO);
         }
 
         [HttpPost]
@@ -85,20 +39,7 @@ namespace VendorTrack.Controllers
         {
             if (ModelState.IsValid)
             {
-                var VendorNcrEntity = new VendorNcr()
-                {
-                    NcrNumber = _ncrNumberGenerator.GenerateNcrNumber(),
-                    PartNumber = addNewVendorNcrDTO.PartNumber,
-                    Fault = addNewVendorNcrDTO.Fault,
-                    ReceivedDate = addNewVendorNcrDTO.ReceivedDate,
-                    ReceivedQuantity = addNewVendorNcrDTO.ReceivedQuantity,
-                    NonConformingQuantity = addNewVendorNcrDTO.NonConformingQuantity,
-                    VendorName = addNewVendorNcrDTO.VendorName,
-                    ContactName = addNewVendorNcrDTO.ContactName,
-                    ContactEmail = addNewVendorNcrDTO.ContactEmail,
-                };
-                _context.Add(VendorNcrEntity);
-                _context.SaveChanges();
+                _vendorNcrRepository.SaveNewVendorNCR(addNewVendorNcrDTO);
                 return Ok(new { message = "NCR created successfully" });
             }
             return BadRequest(new { message = "Something went wrong" });
@@ -109,21 +50,7 @@ namespace VendorTrack.Controllers
         {
             if (ModelState.IsValid)
             {
-                var VendorNcrEntity = _context.VendorNcrs.Find(updateVendorNcrDTO.VendorNcrId);
-
-                if(VendorNcrEntity == null) return BadRequest(new { message = "NCR not found" });
-
-                VendorNcrEntity.NcrNumber = updateVendorNcrDTO.NcrNumber;
-                VendorNcrEntity.PartNumber = updateVendorNcrDTO.PartNumber;
-                VendorNcrEntity.Fault = updateVendorNcrDTO.Fault;
-                VendorNcrEntity.ReceivedDate = updateVendorNcrDTO.ReceivedDate;
-                VendorNcrEntity.ReceivedQuantity = updateVendorNcrDTO.ReceivedQuantity;
-                VendorNcrEntity.NonConformingQuantity = updateVendorNcrDTO.NonConformingQuantity;
-                VendorNcrEntity.VendorName = updateVendorNcrDTO.VendorName;
-                VendorNcrEntity.ContactName = updateVendorNcrDTO.ContactName;
-                VendorNcrEntity.ContactEmail = updateVendorNcrDTO.ContactEmail;
-
-                _context.SaveChanges();
+                _vendorNcrRepository.UpdateVendorNCR(updateVendorNcrDTO);
                 return Ok(new { message = "NCR updated successfully" });
             }
             return BadRequest(new { message = "Something went wrong" });
@@ -132,10 +59,7 @@ namespace VendorTrack.Controllers
         [HttpDelete]
         public IActionResult DeleteNcr([FromBody] int ncrId)
         {
-            var VendorNcr = _context.VendorNcrs.Find(ncrId);
-            if (VendorNcr == null) return BadRequest(new { message = "NCR not found" });
-            _context.VendorNcrs.Remove(VendorNcr);
-            _context.SaveChanges();
+            _vendorNcrRepository.DeleteVendorNCR(ncrId);
             return Ok(new { message = "NCR deleted successfully" });
         }
     }

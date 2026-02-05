@@ -1,11 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using VendorTrack.Data;
 using VendorTrack.Helper;
+using VendorTrack.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddScoped<IVendorNcrRepository, VendorNcrRepository>();
 builder.Services.AddScoped<INcrNumberGenerator, NcrNumberGenerator>();
 
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
