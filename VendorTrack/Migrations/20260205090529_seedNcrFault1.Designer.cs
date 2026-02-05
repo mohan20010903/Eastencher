@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VendorTrack.Data;
 
@@ -11,9 +12,11 @@ using VendorTrack.Data;
 namespace VendorTrack.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20260205090529_seedNcrFault1")]
+    partial class seedNcrFault1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -66,27 +69,9 @@ namespace VendorTrack.Migrations
                     b.HasData(
                         new
                         {
-                            FaultId = 1,
-                            ActiveStatus = true,
-                            FaultDescription = "Damage"
-                        },
-                        new
-                        {
-                            FaultId = 2,
-                            ActiveStatus = true,
-                            FaultDescription = "Dimension"
-                        },
-                        new
-                        {
-                            FaultId = 3,
-                            ActiveStatus = true,
-                            FaultDescription = "Scratch"
-                        },
-                        new
-                        {
                             FaultId = 4,
                             ActiveStatus = true,
-                            FaultDescription = "Others"
+                            FaultDescription = "Scratch"
                         });
                 });
 
