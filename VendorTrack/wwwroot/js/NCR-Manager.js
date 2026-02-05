@@ -81,7 +81,7 @@
     $('#txt_recqty, #txt_ncqty').on('blur', function () {
         var recqty = $('#txt_recqty').val();
         var ncqty = $('#txt_ncqty').val();
-        if (recqty < ncqty) {
+        if (recqty != '' && parseInt(recqty) < parseInt(ncqty)) {
             alert('NC quantity cannot be greater than Received quantity');
             $('#txt_ncqty').val('');
         }
