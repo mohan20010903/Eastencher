@@ -67,7 +67,7 @@
 				<span>:</span>
 			</div>
 			<div class="col-9">
-				<input type="text" id="txt_recqty" placeholder="Enter" class="form-control" autocomplete="off" />
+				<input type="text" id="txt_recqty" placeholder="Enter" class="form-control" autocomplete="off" oninput="this.value=this.value.replace(/[^0-9]/g,'');" maxlength="5" />
 			</div>
 		</div>
 		<div class="row mb-1">
@@ -78,7 +78,7 @@
 				<span>:</span>
 			</div>
 			<div class="col-9">
-				<input type="text" id="txt_ncqty" placeholder="Enter" class="form-control" autocomplete="off" />
+				<input type="text" id="txt_ncqty" placeholder="Enter" class="form-control" autocomplete="off" oninput="this.value=this.value.replace(/[^0-9]/g,'');" maxlength="5"/>
 			</div>
 		</div>
 		<div class="row mb-1">
