@@ -77,6 +77,15 @@
         sessionStorage.clear();
         location.reload();
     })
+
+    $('#txt_recqty, #txt_ncqty').on('blur', function () {
+        var recqty = $('#txt_recqty').val();
+        var ncqty = $('#txt_ncqty').val();
+        if (recqty < ncqty) {
+            alert('NC quantity cannot be greater than Received quantity');
+            $('#txt_ncqty').val('');
+        }
+    })
 });
 function SaveNCR() {
     var parts = $('#txt_recdate').val().split('-'); // dd-mm-yyyy
