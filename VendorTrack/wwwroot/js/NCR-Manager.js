@@ -65,7 +65,10 @@
         location.href = "/VendorNcrs/Index";      
     })
 
-    $('.delete').on('click', function () {
+    $('.delete').on('click', function (e) {
+        e.preventDefault();
+        if (!confirm('Are you sure, want to delete?'))
+            return false;
         var ncrId_ = $(this)
             .closest('tr')
             .find('#hid_NcrId')
