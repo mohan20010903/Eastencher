@@ -12,6 +12,6 @@ namespace VendorTrack.Data
         }
         public DbSet<VendorNcr> VendorNcrs { get; set; }
         public DbSet<NcrFault> NcrFaults { get; set; }
-        public DbSet<Counters> Counters { get; set; }
+        public DbSet<Counter> Counters { get; set; }
     }
 }

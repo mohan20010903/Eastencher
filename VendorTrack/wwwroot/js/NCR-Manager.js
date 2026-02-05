@@ -72,6 +72,11 @@
             .val();
         DeleteNCR(ncrId_);
     })
+
+    $('#btn_clear').on('click', function () {
+        sessionStorage.clear();
+        location.reload();
+    })
 });
 function SaveNCR() {
     var parts = $('#txt_recdate').val().split('-'); // dd-mm-yyyy

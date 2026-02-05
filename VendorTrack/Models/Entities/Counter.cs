@@ -2,7 +2,7 @@
 
 namespace VendorTrack.Models.Entities
 {
-    public class Counters
+    public class Counter
     {
         [Key]
         public int Id { get; set; }
